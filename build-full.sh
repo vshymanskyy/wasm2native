@@ -1,5 +1,6 @@
 export CC
 
+rm -rf ./build
 rm -f wasi-app.*
 
 wasm2c "$1" -o wasi-app.c
