@@ -2,6 +2,12 @@
 
 Turn WASI apps into native executables
 
+## How it works
+
+```log
+app.wasm + wasm2c + compiler (Zig) + uvwasi + libuv = native app
+```
+
 ## Prerequisites
 
 - CMake
