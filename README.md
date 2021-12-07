@@ -28,6 +28,7 @@ CC=clang-12 ./build.sh ./examples/coremark.wasm
 
 ## TODO
 
+- [ ] Bind all WASI imports (currently it's a bare minimum)
 - [ ] Convert main script to Zig
 - [ ] Windows support
 - [ ] `CMake+Zig` as the primary toolchain
