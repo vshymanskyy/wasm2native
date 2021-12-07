@@ -9,9 +9,9 @@ project(wasiapp)
 set(OUT_FILE "app.out")
 
 if(BUILD_DUMMY)
-  set(app_srcs dummy.c)
+  set(app_srcs src/dummy.c)
 else()
-  set(app_srcs wasi-app.c wasi-main.c wasm-rt-impl.c)
+  set(app_srcs src/wasi-app.c src/wasi-main.c src/wasm-rt-impl.c)
 endif()
 add_executable(${OUT_FILE} ${app_srcs})
 

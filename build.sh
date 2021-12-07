@@ -1,8 +1,9 @@
 export CC=${CC:="zig cc"}
 
-rm -f wasi-app.*
+rm -f src/wasi-app.*
 
 wasm2c "$1" -o wasi-app.c
+mv wasi-app.* ./src
 
 OPT_FLAGS="-O3 -flto -fomit-frame-pointer -fno-stack-protector -march=native"
 SRCS="wasi-app.c wasi-main.c wasm-rt-impl.c"

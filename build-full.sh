@@ -1,9 +1,10 @@
 export CC
 
 rm -rf ./build
-rm -f wasi-app.*
+rm -f ./src/wasi-app.*
 
 wasm2c "$1" -o wasi-app.c
+mv wasi-app.* ./src
 
 mkdir -p build
 cd build
