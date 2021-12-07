@@ -24,8 +24,12 @@ CC="clang-12" ./build-full.sh ./examples/coremark.wasm
 # Cross-compile with Zig CC: x86_64-windows-gnu, x86_64-linux-gnu, x86_64-macos-gnu
 CC="zig cc -Dtarget=x86_64-linux-musl" ./build-full.sh ./examples/coremark.wasm
 
-# Two-step:
+### Two-step mode (faster)
+
+# Build libs (needed only once):
 ./build-libs.sh
+
+# Build app:
 ./build.sh ./examples/coremark.wasm
 
 CC=gcc ./build.sh ./examples/coremark.wasm
