@@ -11,9 +11,8 @@ app.wasm + wasm2c + compiler (Zig) + uvwasi + libuv = native app
 ## Prerequisites
 
 - CMake
-- Native toolchain (GCC/Clang/MSVC)
+- Native toolchain (GCC/Clang/MSVC). Optional: [Zig](https://github.com/ziglang/zig/releases/latest)
 - [WABT](https://github.com/WebAssembly/wabt/releases/latest)
-- Optional: [Zig](https://github.com/ziglang/zig/releases/latest)
 
 ## Usage examples
 
