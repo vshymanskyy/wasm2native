@@ -30,7 +30,7 @@ CC=clang-12 ./build.sh ./examples/coremark.wasm
 
 - [ ] Convert main script to Zig
 - [ ] Windows support
-- [ ] Make Zig the primary toolchain and only prerequisite
+- [ ] `CMake+Zig` as the primary toolchain
     - [ ] Use Zig to build `libuv`, `uvwasi`
     - [ ] Ship `wasm2c` as a default app, build it
 - [ ] Fix cross-compilation
