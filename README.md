@@ -1,4 +1,8 @@
-##
+# wasm2native
+
+Turn WASI apps into native executables
+
+## Usage examples
 
 ```sh
 # Single step:
