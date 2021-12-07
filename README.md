@@ -34,9 +34,10 @@ Hello from WebAssembly!
 # Build libs (needed only once):
 ./build-libs.sh
 
-# Build app:
+# Build app (defaults to Zig):
 ./build.sh ./examples/coremark.wasm
 
+# Specify another compiler:
 CC=gcc ./build.sh ./examples/coremark.wasm
 CC=clang-12 ./build.sh ./examples/coremark.wasm
 ```
