@@ -2,6 +2,13 @@
 
 Turn WASI apps into native executables
 
+## Prerequisites
+
+- CMake
+- Native toolchain (GCC/Clang/MSVC)
+- [WABT](https://github.com/WebAssembly/wabt/releases/latest)
+- Optional: [Zig](https://github.com/ziglang/zig/releases/latest)
+
 ## Usage examples
 
 ```sh
@@ -21,7 +28,10 @@ CC=clang-12 ./build.sh ./examples/coremark.wasm
 
 ## TODO
 
-- [ ] Use Zig to build `libuv`, `uvwasi`
 - [ ] Convert main script to Zig
-- [ ] Ship `wasm2c` as a default app, build it
+- [ ] Windows support
+- [ ] Make Zig the primary toolchain and only prerequisite
+    - [ ] Use Zig to build `libuv`, `uvwasi`
+    - [ ] Ship `wasm2c` as a default app, build it
+- [ ] Fix cross-compilation
 - [ ] Improve build speed for big apps. Split `wasm2c` output?
