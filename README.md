@@ -41,6 +41,12 @@ CC=gcc ./build.sh ./examples/coremark.wasm
 CC=clang-12 ./build.sh ./examples/coremark.wasm
 ```
 
+## Coremark 1.0 results
+
+Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
+- Native: **32475**
+- wasm2c: **27400** (84% of native)
+
 ## TODO
 
 - [ ] Bind all WASI imports (currently it's a bare minimum)
