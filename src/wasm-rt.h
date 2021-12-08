@@ -68,6 +68,13 @@ extern "C" {
 
 #endif
 
+/** TODO: Detect Big-Endian target
+ *
+ * #define WABT_BIG_ENDIAN 1
+ *
+ * */
+
+
 /** Reason a trap occurred. Provide this to `wasm_rt_trap`. */
 typedef enum {
   WASM_RT_TRAP_NONE,         /** No error. */

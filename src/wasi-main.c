@@ -29,6 +29,8 @@ static uvwasi_t uvwasi;
   IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  \
   IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)
 
+#define READ32(x)   (*(u32*)(x))
+
 typedef u32 wasm_ptr;
 
 IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_getZ_iii, (u32 fd, wasm_ptr buf), {
@@ -69,19 +71,150 @@ IMPORT_IMPL_WASI_ALL(u32, Z_args_getZ_iii, (wasm_ptr argv, wasm_ptr argv_buf), {
 });
 
 IMPORT_IMPL_WASI_ALL(void, Z_proc_exitZ_vi, (u32 code), {
+    uvwasi_destroy(&uvwasi);
     exit(code);
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_getZ_iii, (u32 fd, wasm_ptr buf), {
-    uvwasi_fdstat_t stat;
-    uvwasi_errno_t ret = uvwasi_fd_fdstat_get(&uvwasi, fd, &stat);
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_getZ_iii, (u32 fd, wasm_ptr stat),
+{
+    uvwasi_fdstat_t uvstat;
+    uvwasi_errno_t ret = uvwasi_fd_fdstat_get(&uvwasi, fd, &uvstat);
     if (ret == UVWASI_ESUCCESS) {
-        MEM_SET(buf, 0, 24);
-        MEM_WRITE8 (buf+0, stat.fs_filetype);
-        MEM_WRITE16(buf+2, stat.fs_flags);
-        MEM_WRITE64(buf+8, stat.fs_rights_base);
-        MEM_WRITE64(buf+16, stat.fs_rights_inheriting);
+        MEM_SET(stat, 0, 24);
+        MEM_WRITE8 (stat+0,  uvstat.fs_filetype);
+        MEM_WRITE16(stat+2,  uvstat.fs_flags);
+        MEM_WRITE64(stat+8,  uvstat.fs_rights_base);
+        MEM_WRITE64(stat+16, uvstat.fs_rights_inheriting);
     }
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_set_flagsZ_iii, (u32 fd, u32 flags), {
+    uvwasi_errno_t ret = uvwasi_fd_fdstat_set_flags(&uvwasi, fd, flags);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_UNSTABLE(u32, Z_path_filestat_getZ_iiiiii, (u32 fd, u32 flags, wasm_ptr path, u32 path_len, wasm_ptr stat),
+{
+    uvwasi_filestat_t uvstat;
+    uvwasi_errno_t ret = uvwasi_path_filestat_get(&uvwasi, fd, flags, (char*)MEMACCESS(path), path_len, &uvstat);
+    if (ret == UVWASI_ESUCCESS) {
+        MEM_SET(stat, 0, 56);
+        MEM_WRITE64(stat+0,  uvstat.st_dev);
+        MEM_WRITE64(stat+8,  uvstat.st_ino);
+        MEM_WRITE8 (stat+16, uvstat.st_filetype);
+        MEM_WRITE32(stat+20, uvstat.st_nlink);
+        MEM_WRITE64(stat+24, uvstat.st_size);
+        MEM_WRITE64(stat+32, uvstat.st_atim);
+        MEM_WRITE64(stat+40, uvstat.st_mtim);
+        MEM_WRITE64(stat+48, uvstat.st_ctim);
+    }
+    return ret;
+});
+
+IMPORT_IMPL_WASI_PREVIEW1(u32, Z_path_filestat_getZ_iiiiii, (u32 fd, u32 flags, wasm_ptr path, u32 path_len, wasm_ptr stat),
+{
+    uvwasi_filestat_t uvstat;
+    uvwasi_errno_t ret = uvwasi_path_filestat_get(&uvwasi, fd, flags, (char*)MEMACCESS(path), path_len, &uvstat);
+    if (ret == UVWASI_ESUCCESS) {
+        MEM_SET(stat, 0, 64);
+        MEM_WRITE64(stat+0,  uvstat.st_dev);
+        MEM_WRITE64(stat+8,  uvstat.st_ino);
+        MEM_WRITE8 (stat+16, uvstat.st_filetype);
+        MEM_WRITE64(stat+24, uvstat.st_nlink);
+        MEM_WRITE64(stat+32, uvstat.st_size);
+        MEM_WRITE64(stat+40, uvstat.st_atim);
+        MEM_WRITE64(stat+48, uvstat.st_mtim);
+        MEM_WRITE64(stat+56, uvstat.st_ctim);
+    }
+    return ret;
+});
+
+IMPORT_IMPL_WASI_UNSTABLE(u32, Z_fd_filestat_getZ_iii, (u32 fd, wasm_ptr stat),
+{
+    uvwasi_filestat_t uvstat;
+    uvwasi_errno_t ret = uvwasi_fd_filestat_get(&uvwasi, fd, &uvstat);
+    if (ret == UVWASI_ESUCCESS) {
+        MEM_SET(stat, 0, 56);
+        MEM_WRITE64(stat+0,  uvstat.st_dev);
+        MEM_WRITE64(stat+8,  uvstat.st_ino);
+        MEM_WRITE8 (stat+16, uvstat.st_filetype);
+        MEM_WRITE32(stat+20, uvstat.st_nlink);
+        MEM_WRITE64(stat+24, uvstat.st_size);
+        MEM_WRITE64(stat+32, uvstat.st_atim);
+        MEM_WRITE64(stat+40, uvstat.st_mtim);
+        MEM_WRITE64(stat+48, uvstat.st_ctim);
+    }
+    return ret;
+});
+
+IMPORT_IMPL_WASI_PREVIEW1(u32, Z_fd_filestat_getZ_iii, (u32 fd, wasm_ptr stat),
+{
+    uvwasi_filestat_t uvstat;
+    uvwasi_errno_t ret = uvwasi_fd_filestat_get(&uvwasi, fd, &uvstat);
+    if (ret == UVWASI_ESUCCESS) {
+        MEM_SET(stat, 0, 64);
+        MEM_WRITE64(stat+0,  uvstat.st_dev);
+        MEM_WRITE64(stat+8,  uvstat.st_ino);
+        MEM_WRITE8 (stat+16, uvstat.st_filetype);
+        MEM_WRITE64(stat+24, uvstat.st_nlink);
+        MEM_WRITE64(stat+32, uvstat.st_size);
+        MEM_WRITE64(stat+40, uvstat.st_atim);
+        MEM_WRITE64(stat+48, uvstat.st_mtim);
+        MEM_WRITE64(stat+56, uvstat.st_ctim);
+    }
+    return ret;
+});
+
+
+IMPORT_IMPL_WASI_UNSTABLE(u32, Z_fd_seekZ_iijii, (u32 fd, u64 offset, u32 wasi_whence, wasm_ptr pos),
+{
+    uvwasi_whence_t whence = -1;
+    switch (wasi_whence) {
+    case 0: whence = UVWASI_WHENCE_CUR; break;
+    case 1: whence = UVWASI_WHENCE_END; break;
+    case 2: whence = UVWASI_WHENCE_SET; break;
+    }
+
+    uvwasi_filesize_t uvpos;
+    uvwasi_errno_t ret = uvwasi_fd_seek(&uvwasi, fd, offset, whence, &uvpos);
+    MEM_WRITE64(pos, uvpos);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_PREVIEW1(u32, Z_fd_seekZ_iijii, (u32 fd, u64 offset, u32 wasi_whence, wasm_ptr pos),
+{
+    uvwasi_whence_t whence = -1;
+    switch (wasi_whence) {
+    case 0: whence = UVWASI_WHENCE_SET; break;
+    case 1: whence = UVWASI_WHENCE_CUR; break;
+    case 2: whence = UVWASI_WHENCE_END; break;
+    }
+
+    uvwasi_filesize_t uvpos;
+    uvwasi_errno_t ret = uvwasi_fd_seek(&uvwasi, fd, offset, whence, &uvpos);
+    MEM_WRITE64(pos, uvpos);
+    return ret;
+});
+
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_openZ_iiiiiijjii, (u32 dirfd, u32 dirflags,
+                                                    wasm_ptr path, u32 path_len,
+                                                    u32 oflags, u64 fs_rights_base, u64 fs_rights_inheriting,
+                                                    u32 fs_flags, wasm_ptr fd),
+{
+    uvwasi_fd_t uvfd;
+    uvwasi_errno_t ret = uvwasi_path_open(&uvwasi,
+                                 dirfd,
+                                 dirflags,
+                                 (char*)MEMACCESS(path),
+                                 path_len,
+                                 oflags,
+                                 fs_rights_base,
+                                 fs_rights_inheriting,
+                                 fs_flags,
+                                 &uvfd);
+    MEM_WRITE32(fd, uvfd);
     return ret;
 });
 
@@ -103,11 +236,11 @@ typedef struct wasi_iovec_t
     uvwasi_size_t buf_len;
 } wasi_iovec_t;
 
-IMPORT_IMPL_WASI_ALL(u32, Z_fd_writeZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 iovs_len, wasm_ptr nwritten), {
-    
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_writeZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 iovs_len, wasm_ptr nwritten),
+{
     wasi_iovec_t * wasi_iovs = (wasi_iovec_t *)MEMACCESS(iovs_offset);
 
-#if defined(M3_COMPILER_MSVC)
+#if defined(_MSC_VER)
     if (iovs_len > 32) return UVWASI_EINVAL;
     uvwasi_ciovec_t  iovs[32];
 #else
@@ -115,8 +248,8 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_writeZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 
     uvwasi_ciovec_t  iovs[iovs_len];
 #endif
     for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
-        iovs[i].buf = MEMACCESS(*(u32*)(&wasi_iovs[i].buf));
-        iovs[i].buf_len = *(u32*)(&wasi_iovs[i].buf_len);
+        iovs[i].buf = MEMACCESS(READ32(&wasi_iovs[i].buf));
+        iovs[i].buf_len = READ32(&wasi_iovs[i].buf_len);
     }
     
     uvwasi_size_t num_written;
@@ -125,38 +258,32 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_writeZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 
     return ret;
 });
 
-IMPORT_IMPL_WASI_UNSTABLE(u32, Z_fd_seekZ_iijii, (u32 fd, u64 offset, u32 wasi_whence, wasm_ptr result), {
-    
-    uvwasi_whence_t whence = -1;
-    switch (wasi_whence) {
-    case 0: whence = UVWASI_WHENCE_CUR; break;
-    case 1: whence = UVWASI_WHENCE_END; break;
-    case 2: whence = UVWASI_WHENCE_SET; break;
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_readZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 iovs_len, wasm_ptr nread),
+{
+    wasi_iovec_t * wasi_iovs = (wasi_iovec_t *)MEMACCESS(iovs_offset);
+
+#if defined(_MSC_VER)
+    if (iovs_len > 32) return UVWASI_EINVAL;
+    uvwasi_ciovec_t  iovs[32];
+#else
+    if (iovs_len > 128) return UVWASI_EINVAL;
+    uvwasi_ciovec_t  iovs[iovs_len];
+#endif
+
+    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+        iovs[i].buf = MEMACCESS(READ32(&wasi_iovs[i].buf));
+        iovs[i].buf_len = READ32(&wasi_iovs[i].buf_len);
     }
 
-    uvwasi_filesize_t pos;
-    uvwasi_errno_t ret = uvwasi_fd_seek(&uvwasi, fd, offset, whence, &pos);
-    MEM_WRITE64(result, pos);
-    return ret;
-});
-
-IMPORT_IMPL_WASI_PREVIEW1(u32, Z_fd_seekZ_iijii, (u32 fd, u64 offset, u32 wasi_whence, wasm_ptr result), {
-    
-    uvwasi_whence_t whence = -1;
-    switch (wasi_whence) {
-    case 0: whence = UVWASI_WHENCE_SET; break;
-    case 1: whence = UVWASI_WHENCE_CUR; break;
-    case 2: whence = UVWASI_WHENCE_END; break;
-    }
-
-    uvwasi_filesize_t pos;
-    uvwasi_errno_t ret = uvwasi_fd_seek(&uvwasi, fd, offset, whence, &pos);
-    MEM_WRITE64(result, pos);
+    uvwasi_size_t num_read;
+    uvwasi_errno_t ret = uvwasi_fd_read(&uvwasi, fd, (const uvwasi_iovec_t *)iovs, iovs_len, &num_read);
+    MEM_WRITE32(nread, num_read);
     return ret;
 });
 
 
-int main(int argc, char** argv)
+int main(int argc, const char** argv)
 {
     #define ENV_COUNT       7
     #define PREOPENS_COUNT  2
@@ -179,7 +306,8 @@ int main(int argc, char** argv)
     uvwasi_options_t init_options;
     uvwasi_options_init(&init_options);
 
-    init_options.argc = 0;
+    init_options.argc = argc;
+    init_options.argv = argv;
     init_options.envp = (const char **) env;
     init_options.preopenc = PREOPENS_COUNT;
     init_options.preopens = preopens;
@@ -194,6 +322,8 @@ int main(int argc, char** argv)
     init();
 
     Z__startZ_vv();
+
+    uvwasi_destroy(&uvwasi);
 
     return 0;
 }
