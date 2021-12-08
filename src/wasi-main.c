@@ -31,9 +31,12 @@ static uvwasi_t uvwasi;
 
 #define READ32(x)   (*(u32*)(x))
 
+// TODO: Add linear memory boundary checks
+
 typedef u32 wasm_ptr;
 
-IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_getZ_iii, (u32 fd, wasm_ptr buf), {
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_getZ_iii, (u32 fd, wasm_ptr buf),
+{
     uvwasi_prestat_t prestat;
     uvwasi_errno_t ret = uvwasi_fd_prestat_get(&uvwasi, fd, &prestat);
     if (ret == UVWASI_ESUCCESS) {
@@ -44,35 +47,35 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_getZ_iii, (u32 fd, wasm_ptr buf), {
 });
 
 
-IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_dir_nameZ_iiii, (u32 fd, wasm_ptr path, u32 path_len), {
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_dir_nameZ_iiii, (u32 fd, wasm_ptr path, u32 path_len),
+{
     uvwasi_errno_t ret = uvwasi_fd_prestat_dir_name(&uvwasi, fd, (char*)MEMACCESS(path), path_len);
     
     return ret;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_environ_sizes_getZ_iii, (wasm_ptr env_count, wasm_ptr env_buf_size), {
-    MEM_WRITE32(env_count,      0);
+IMPORT_IMPL_WASI_ALL(u32, Z_environ_sizes_getZ_iii, (wasm_ptr env_count, wasm_ptr env_buf_size),
+{
+    MEM_WRITE32(env_count,      0);     // TODO
     MEM_WRITE32(env_buf_size,   0);
     return UVWASI_ESUCCESS;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_environ_getZ_iii, (wasm_ptr env, wasm_ptr env_buf), {
-    return UVWASI_ESUCCESS;
+IMPORT_IMPL_WASI_ALL(u32, Z_environ_getZ_iii, (wasm_ptr env, wasm_ptr env_buf),
+{
+    return UVWASI_ESUCCESS;             // TODO
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_args_sizes_getZ_iii, (wasm_ptr argc, wasm_ptr argv_buf_size), {
-    MEM_WRITE32(argc,            0);
+IMPORT_IMPL_WASI_ALL(u32, Z_args_sizes_getZ_iii, (wasm_ptr argc, wasm_ptr argv_buf_size),
+{
+    MEM_WRITE32(argc,            0);    // TODO
     MEM_WRITE32(argv_buf_size,   0);
     return UVWASI_ESUCCESS;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_args_getZ_iii, (wasm_ptr argv, wasm_ptr argv_buf), {
-    return UVWASI_ESUCCESS;
-});
-
-IMPORT_IMPL_WASI_ALL(void, Z_proc_exitZ_vi, (u32 code), {
-    uvwasi_destroy(&uvwasi);
-    exit(code);
+IMPORT_IMPL_WASI_ALL(u32, Z_args_getZ_iii, (wasm_ptr argv, wasm_ptr argv_buf),
+{
+    return UVWASI_ESUCCESS;             // TODO
 });
 
 IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_getZ_iii, (u32 fd, wasm_ptr stat),
@@ -89,7 +92,8 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_getZ_iii, (u32 fd, wasm_ptr stat),
     return ret;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_set_flagsZ_iii, (u32 fd, u32 flags), {
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_set_flagsZ_iii, (u32 fd, u32 flags),
+{
     uvwasi_errno_t ret = uvwasi_fd_fdstat_set_flags(&uvwasi, fd, flags);
     return ret;
 });
@@ -223,10 +227,55 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_closeZ_ii, (u32 fd), {
     return ret;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_clock_time_getZ_iiji, (u32 clk_id, u64 precision, wasm_ptr result), {
-    uvwasi_timestamp_t t;
-    uvwasi_errno_t ret = uvwasi_clock_time_get(&uvwasi, clk_id, precision, &t);
-    MEM_WRITE64(result, t);
+IMPORT_IMPL_WASI_ALL(u32, Z_path_symlinkZ_iiiiii, (wasm_ptr old_path, u32 old_path_len, u32 fd,
+                                                   wasm_ptr new_path, u32 new_path_len),
+{
+    uvwasi_errno_t ret = uvwasi_path_symlink(&uvwasi, (char*)MEMACCESS(old_path), old_path_len,
+                                                  fd, (char*)MEMACCESS(new_path), new_path_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_renameZ_iiiiiii, (u32 old_fd, wasm_ptr old_path, u32 old_path_len,
+                                                   u32 new_fd, wasm_ptr new_path, u32 new_path_len),
+{
+    uvwasi_errno_t ret = uvwasi_path_rename(&uvwasi, old_fd, (char*)MEMACCESS(old_path), old_path_len,
+                                                     new_fd, (char*)MEMACCESS(new_path), new_path_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_unlink_fileZ_iiii, (u32 fd, wasm_ptr path, u32 path_len),
+{
+    uvwasi_errno_t ret = uvwasi_path_unlink_file(&uvwasi, fd, (char*)MEMACCESS(path), path_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_readlinkZ_iiiiiii, (u32 fd, wasm_ptr path, u32 path_len,
+                                                     wasm_ptr buf, u32 buf_len, wasm_ptr bufused),
+{
+    uvwasi_size_t uvbufused;
+    uvwasi_errno_t ret = uvwasi_path_readlink(&uvwasi, fd, (char*)MEMACCESS(path), path_len, MEMACCESS(buf), buf_len, &uvbufused);
+
+    MEM_WRITE32(bufused, uvbufused);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_create_directoryZ_iiii, (u32 fd, wasm_ptr path, u32 path_len),
+{
+    uvwasi_errno_t ret = uvwasi_path_create_directory(&uvwasi, fd, (char*)MEMACCESS(path), path_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_remove_directoryZ_iiii, (u32 fd, wasm_ptr path, u32 path_len),
+{
+    uvwasi_errno_t ret = uvwasi_path_remove_directory(&uvwasi, fd, (char*)MEMACCESS(path), path_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_readdirZ_iiiiji, (u32 fd, wasm_ptr buf, u32 buf_len, u64 cookie, wasm_ptr bufused),
+{
+    uvwasi_size_t uvbufused;
+    uvwasi_errno_t ret = uvwasi_fd_readdir(&uvwasi, fd, MEMACCESS(buf), buf_len, cookie, &uvbufused);
+    MEM_WRITE32(bufused, uvbufused);
     return ret;
 });
 
@@ -259,6 +308,28 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_writeZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 
 });
 
 
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_pwriteZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 iovs_len, u64 offset, wasm_ptr nwritten),
+{
+    wasi_iovec_t * wasi_iovs = (wasi_iovec_t *)MEMACCESS(iovs_offset);
+
+#if defined(_MSC_VER)
+    if (iovs_len > 32) return UVWASI_EINVAL;
+    uvwasi_ciovec_t  iovs[32];
+#else
+    if (iovs_len > 128) return UVWASI_EINVAL;
+    uvwasi_ciovec_t  iovs[iovs_len];
+#endif
+    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+        iovs[i].buf = MEMACCESS(READ32(&wasi_iovs[i].buf));
+        iovs[i].buf_len = READ32(&wasi_iovs[i].buf_len);
+    }
+
+    uvwasi_size_t num_written;
+    uvwasi_errno_t ret = uvwasi_fd_pwrite(&uvwasi, fd, iovs, iovs_len, offset, &num_written);
+    MEM_WRITE32(nwritten, num_written);
+    return ret;
+});
+
 IMPORT_IMPL_WASI_ALL(u32, Z_fd_readZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 iovs_len, wasm_ptr nread),
 {
     wasi_iovec_t * wasi_iovs = (wasi_iovec_t *)MEMACCESS(iovs_offset);
@@ -281,6 +352,59 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_readZ_iiiii, (u32 fd, wasm_ptr iovs_offset, u32 i
     MEM_WRITE32(nread, num_read);
     return ret;
 });
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_preadZ_iiiiji, (u32 fd, wasm_ptr iovs_offset, u32 iovs_len, u64 offset, wasm_ptr nread),
+{
+    wasi_iovec_t * wasi_iovs = (wasi_iovec_t *)MEMACCESS(iovs_offset);
+
+#if defined(_MSC_VER)
+    if (iovs_len > 32) return UVWASI_EINVAL;
+    uvwasi_ciovec_t  iovs[32];
+#else
+    if (iovs_len > 128) return UVWASI_EINVAL;
+    uvwasi_ciovec_t  iovs[iovs_len];
+#endif
+
+    for (uvwasi_size_t i = 0; i < iovs_len; ++i) {
+        iovs[i].buf = MEMACCESS(READ32(&wasi_iovs[i].buf));
+        iovs[i].buf_len = READ32(&wasi_iovs[i].buf_len);
+    }
+
+    uvwasi_size_t num_read;
+    uvwasi_errno_t ret = uvwasi_fd_pread(&uvwasi, fd, (const uvwasi_iovec_t *)iovs, iovs_len, offset, &num_read);
+    MEM_WRITE32(nread, num_read);
+    return ret;
+});
+
+// TODO: unstable/snapshot_preview1 compatibility
+IMPORT_IMPL_WASI_ALL(u32, Z_poll_oneoffZ_iiiii, (wasm_ptr in, wasm_ptr out, u32 nsubscriptions, wasm_ptr nevents),
+{
+    uvwasi_size_t uvnevents;
+    uvwasi_errno_t ret = uvwasi_poll_oneoff(&uvwasi, MEMACCESS(in), MEMACCESS(out), nsubscriptions, &uvnevents);
+    MEM_WRITE32(nevents, uvnevents);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_clock_time_getZ_iiji, (u32 clk_id, u64 precision, wasm_ptr result),
+{
+    uvwasi_timestamp_t t;
+    uvwasi_errno_t ret = uvwasi_clock_time_get(&uvwasi, clk_id, precision, &t);
+    MEM_WRITE64(result, t);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_random_getZ_iii, (wasm_ptr buf, u32 buf_len),
+{
+    uvwasi_errno_t ret = uvwasi_random_get(&uvwasi, MEMACCESS(buf), buf_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(void, Z_proc_exitZ_vi, (u32 code),
+{
+    uvwasi_destroy(&uvwasi);
+    exit(code);
+});
+
 
 
 int main(int argc, const char** argv)
