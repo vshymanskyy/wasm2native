@@ -4,6 +4,8 @@ Turn WASI apps into native executables
 
 ## How it works
 
+The approach is similar to [`WasmBoxC`](https://kripken.github.io/blog/wasm/2020/07/27/wasmboxc.html) or [`RLBox`](https://hacks.mozilla.org/2020/02/securing-firefox-with-webassembly/):
+
 ```log
 app.wasm + wasm2c + compiler (Zig) + uvwasi + libuv = native app
 ```
@@ -40,6 +42,12 @@ Hello from WebAssembly!
 CC=gcc ./build.sh ./examples/coremark.wasm
 CC=clang-12 ./build.sh ./examples/coremark.wasm
 ```
+
+## Coremark 1.0 results
+
+Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
+- Native: **32475**
+- wasm2c: **27400** (84% of native)
 
 ## TODO
 
