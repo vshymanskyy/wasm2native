@@ -50,32 +50,99 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_getZ_iii, (u32 fd, wasm_ptr buf),
 IMPORT_IMPL_WASI_ALL(u32, Z_fd_prestat_dir_nameZ_iiii, (u32 fd, wasm_ptr path, u32 path_len),
 {
     uvwasi_errno_t ret = uvwasi_fd_prestat_dir_name(&uvwasi, fd, (char*)MEMACCESS(path), path_len);
-    
     return ret;
 });
 
 IMPORT_IMPL_WASI_ALL(u32, Z_environ_sizes_getZ_iii, (wasm_ptr env_count, wasm_ptr env_buf_size),
 {
-    MEM_WRITE32(env_count,      0);     // TODO
-    MEM_WRITE32(env_buf_size,   0);
-    return UVWASI_ESUCCESS;
+    uvwasi_size_t uvcount;
+    uvwasi_size_t uvbufsize;
+    uvwasi_errno_t ret = uvwasi_environ_sizes_get(&uvwasi, &uvcount, &uvbufsize);
+    if (ret == UVWASI_ESUCCESS) {
+        MEM_WRITE32(env_count,      uvcount);
+        MEM_WRITE32(env_buf_size,   uvbufsize);
+    }
+    return ret;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_environ_getZ_iii, (wasm_ptr env, wasm_ptr env_buf),
+IMPORT_IMPL_WASI_ALL(u32, Z_environ_getZ_iii, (wasm_ptr env, wasm_ptr buf),
 {
-    return UVWASI_ESUCCESS;             // TODO
+    uvwasi_size_t uvcount;
+    uvwasi_size_t uvbufsize;
+    uvwasi_errno_t ret;
+    ret = uvwasi_environ_sizes_get(&uvwasi, &uvcount, &uvbufsize);
+    if (ret != UVWASI_ESUCCESS) {
+        return ret;
+    }
+
+    // TODO: check mem
+
+    char** uvenv = calloc(uvcount, sizeof(char*));
+    if (uvenv == NULL) {
+        return UVWASI_ENOMEM;
+    }
+
+    ret = uvwasi_environ_get(&uvwasi, uvenv, (char*)MEMACCESS(buf));
+    if (ret != UVWASI_ESUCCESS) {
+        free(uvenv);
+        return ret;
+    }
+
+    for (u32 i = 0; i < uvcount; ++i)
+    {
+        uint32_t offset = buf + (uvenv[i] - uvenv[0]);
+        MEM_WRITE32(env+(i*sizeof(wasm_ptr)), offset);
+    }
+
+    free(uvenv);
+
+    return ret;
 });
 
 IMPORT_IMPL_WASI_ALL(u32, Z_args_sizes_getZ_iii, (wasm_ptr argc, wasm_ptr argv_buf_size),
 {
-    MEM_WRITE32(argc,            0);    // TODO
-    MEM_WRITE32(argv_buf_size,   0);
-    return UVWASI_ESUCCESS;
+    uvwasi_size_t uvcount;
+    uvwasi_size_t uvbufsize;
+    uvwasi_errno_t ret = uvwasi_args_sizes_get(&uvwasi, &uvcount, &uvbufsize);
+    if (ret == UVWASI_ESUCCESS) {
+        MEM_WRITE32(argc,            uvcount);
+        MEM_WRITE32(argv_buf_size,   uvbufsize);
+    }
+    return ret;
 });
 
-IMPORT_IMPL_WASI_ALL(u32, Z_args_getZ_iii, (wasm_ptr argv, wasm_ptr argv_buf),
+IMPORT_IMPL_WASI_ALL(u32, Z_args_getZ_iii, (wasm_ptr argv, wasm_ptr buf),
 {
-    return UVWASI_ESUCCESS;             // TODO
+    uvwasi_size_t uvcount;
+    uvwasi_size_t uvbufsize;
+    uvwasi_errno_t ret;
+    ret = uvwasi_args_sizes_get(&uvwasi, &uvcount, &uvbufsize);
+    if (ret != UVWASI_ESUCCESS) {
+        return ret;
+    }
+
+    // TODO: check mem
+
+    char** uvarg = calloc(uvcount, sizeof(char*));
+    if (uvarg == NULL) {
+        return UVWASI_ENOMEM;
+    }
+
+    ret = uvwasi_args_get(&uvwasi, uvarg, (char*)MEMACCESS(buf));
+    if (ret != UVWASI_ESUCCESS) {
+        free(uvarg);
+        return ret;
+    }
+
+    for (u32 i = 0; i < uvcount; ++i)
+    {
+        uint32_t offset = buf + (uvarg[i] - uvarg[0]);
+        MEM_WRITE32(argv+(i*sizeof(wasm_ptr)), offset);
+    }
+
+    free(uvarg);
+
+    return ret;
 });
 
 IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_getZ_iii, (u32 fd, wasm_ptr stat),
@@ -405,7 +472,23 @@ IMPORT_IMPL_WASI_ALL(void, Z_proc_exitZ_vi, (u32 code),
     exit(code);
 });
 
-
+/* TODO:
+ * sched_yield
+ * proc_raise
+ * path_link
+ * path_filestat_set_times
+ * fd_tell
+ * fd_sync
+ * fd_renumber
+ * fd_filestat_set_times
+ * fd_filestat_set_size
+ * fd_fdstat_set_rights
+ * fd_datasync
+ * fd_allocate
+ * fd_advise
+ * clock_res_get
+ * clock_time_get
+ */
 
 int main(int argc, const char** argv)
 {
