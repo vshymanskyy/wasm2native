@@ -46,7 +46,8 @@ CC=clang-12 ./build.sh ./examples/coremark.wasm
 - [ ] Bind all WASI imports (currently it's a bare minimum)
 - [ ] Convert main script to `zig`
     - [ ] Allow setting `CFLAGS`, overriding optimization flags
-- [ ] Windows support
+- [ ] Windows host support
+- [ ] Big-endian target support
 - [ ] `CMake+Zig` as the primary toolchain
     - [ ] Use Zig to build `libuv`, `uvwasi`
     - [ ] Ship `wasm2c.wasm` as a default app, build it
