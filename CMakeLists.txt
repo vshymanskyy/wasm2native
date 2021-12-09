@@ -24,8 +24,8 @@ endif()
 include(FetchContent)
 include(CheckIPOSupported)
 
-FetchContent_Declare(libuv  SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/libuv)
-FetchContent_Declare(uvwasi SOURCE_DIR ${CMAKE_SOURCE_DIR}/deps/uvwasi)
+FetchContent_Declare(libuv  URL ${CMAKE_SOURCE_DIR}/deps/libuv.zip)
+FetchContent_Declare(uvwasi URL ${CMAKE_SOURCE_DIR}/deps/uvwasi.zip)
 
 FetchContent_GetProperties(uvwasi)
 if(NOT uvwasi_POPULATED)
