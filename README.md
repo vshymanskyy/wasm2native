@@ -43,6 +43,8 @@ CC=gcc ./build.sh ./examples/coremark.wasm
 CC=clang-12 ./build.sh ./examples/coremark.wasm
 ```
 
+**Note:** this tool can be used for building `WASI` apps, not `emscripten`-generated `wasm+js` output.
+
 ## Coremark 1.0 results
 
 Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
