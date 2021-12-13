@@ -59,6 +59,7 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 - [ ] Convert main script to `zig`
     - [ ] Allow setting `CFLAGS`, overriding optimization flags
 - [ ] Windows host support
+- [ ] CI via Github Actions
 - [ ] `CMake+Zig` as the primary toolchain
     - [ ] Use Zig to build `libuv`, `uvwasi`
     - [ ] Ship `wasm2c.wasm` as a default app, build it
