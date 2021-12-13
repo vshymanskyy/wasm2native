@@ -53,15 +53,15 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 
 ## TODO
 
-- [ ] Bind all WASI imports (currently it's a bare minimum)
+- [x] Bind all WASI imports
 - [ ] Convert main script to `zig`
     - [ ] Allow setting `CFLAGS`, overriding optimization flags
 - [ ] Windows host support
-- [ ] Big-endian target support
 - [ ] `CMake+Zig` as the primary toolchain
     - [ ] Use Zig to build `libuv`, `uvwasi`
     - [ ] Ship `wasm2c.wasm` as a default app, build it
-- [ ] Fix cross-compilation
+    - [ ] Fix cross-compilation
+    - [ ] Big-endian target support
 - [ ] Improve build speed for big apps. Split `wasm2c` output?
 
 ### License

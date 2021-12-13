@@ -165,6 +165,20 @@ IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_set_flagsZ_iii, (u32 fd, u32 flags),
     return ret;
 });
 
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_fdstat_set_rightsZ_iijj, (u32 fd, u64 fs_rights_base, u64 fs_rights_inheriting),
+{
+    uvwasi_errno_t ret = uvwasi_fd_fdstat_set_rights(&uvwasi, fd, fs_rights_base, fs_rights_inheriting);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_filestat_set_timesZ_iijj, (u32 fd, u32 flags, wasm_ptr path, u32 path_len, u64 atim, u64 mtim, u32 fst_flags),
+{
+    uvwasi_errno_t ret = uvwasi_path_filestat_set_times(&uvwasi, fd, flags, (char*)MEMACCESS(path), path_len, atim, mtim, fst_flags);
+    return ret;
+});
+
+
+
 IMPORT_IMPL_WASI_UNSTABLE(u32, Z_path_filestat_getZ_iiiiii, (u32 fd, u32 flags, wasm_ptr path, u32 path_len, wasm_ptr stat),
 {
     uvwasi_filestat_t uvstat;
@@ -269,6 +283,61 @@ IMPORT_IMPL_WASI_PREVIEW1(u32, Z_fd_seekZ_iijii, (u32 fd, u64 offset, u32 wasi_w
 });
 
 
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_tellZ_iii, (u32 fd, wasm_ptr pos),
+{
+    uvwasi_filesize_t uvpos;
+    uvwasi_errno_t ret = uvwasi_fd_tell(&uvwasi, fd, &uvpos);
+    MEM_WRITE64(pos, uvpos);
+    return ret;
+});
+
+
+
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_filestat_set_sizeZ_iij, (u32 fd, u64 filesize),
+{
+    uvwasi_errno_t ret = uvwasi_fd_filestat_set_size(&uvwasi, fd, filesize);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_filestat_set_timesZ_iijj, (u32 fd, u64 atim, u64 mtim, u32 fst_flags),
+{
+    uvwasi_errno_t ret = uvwasi_fd_filestat_set_times(&uvwasi, fd, atim, mtim, fst_flags);
+    return ret;
+});
+
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_syncZ_ii, (u32 fd),
+{
+    uvwasi_errno_t ret = uvwasi_fd_sync(&uvwasi, fd);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_datasyncZ_ii, (u32 fd),
+{
+    uvwasi_errno_t ret = uvwasi_fd_datasync(&uvwasi, fd);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_renumberZ_ii, (u32 fd_from, u32 fd_to),
+{
+    uvwasi_errno_t ret = uvwasi_fd_renumber(&uvwasi, fd_from, fd_to);
+    return ret;
+});
+
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_allocateZ_iijj, (u32 fd, u64 offset, u64 len),
+{
+    uvwasi_errno_t ret = uvwasi_fd_allocate(&uvwasi, fd, offset, len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_fd_adviseZ_iijji, (u32 fd, u64 offset, u64 len, u32 advice),
+{
+    uvwasi_errno_t ret = uvwasi_fd_advise(&uvwasi, fd, offset, len, advice);
+    return ret;
+});
+
 IMPORT_IMPL_WASI_ALL(u32, Z_path_openZ_iiiiiijjii, (u32 dirfd, u32 dirflags,
                                                     wasm_ptr path, u32 path_len,
                                                     u32 oflags, u64 fs_rights_base, u64 fs_rights_inheriting,
@@ -307,6 +376,14 @@ IMPORT_IMPL_WASI_ALL(u32, Z_path_renameZ_iiiiiii, (u32 old_fd, wasm_ptr old_path
 {
     uvwasi_errno_t ret = uvwasi_path_rename(&uvwasi, old_fd, (char*)MEMACCESS(old_path), old_path_len,
                                                      new_fd, (char*)MEMACCESS(new_path), new_path_len);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_path_linkZ_iiiiiiii, (u32 old_fd, u32 old_flags, wasm_ptr old_path, u32 old_path_len,
+                                                  u32 new_fd,                wasm_ptr new_path, u32 new_path_len),
+{
+    uvwasi_errno_t ret = uvwasi_path_link(&uvwasi, old_fd, old_flags, (char*)MEMACCESS(old_path), old_path_len,
+                                                   new_fd,            (char*)MEMACCESS(new_path), new_path_len);
     return ret;
 });
 
@@ -452,6 +529,15 @@ IMPORT_IMPL_WASI_ALL(u32, Z_poll_oneoffZ_iiiii, (wasm_ptr in, wasm_ptr out, u32 
     return ret;
 });
 
+
+IMPORT_IMPL_WASI_ALL(u32, Z_clock_res_getZ_iii, (u32 clk_id, wasm_ptr result),
+{
+    uvwasi_timestamp_t t;
+    uvwasi_errno_t ret = uvwasi_clock_res_get(&uvwasi, clk_id, &t);
+    MEM_WRITE64(result, t);
+    return ret;
+});
+
 IMPORT_IMPL_WASI_ALL(u32, Z_clock_time_getZ_iiji, (u32 clk_id, u64 precision, wasm_ptr result),
 {
     uvwasi_timestamp_t t;
@@ -466,29 +552,24 @@ IMPORT_IMPL_WASI_ALL(u32, Z_random_getZ_iii, (wasm_ptr buf, u32 buf_len),
     return ret;
 });
 
+IMPORT_IMPL_WASI_ALL(u32, Z_sched_yieldZ_iv, (void),
+{
+    uvwasi_errno_t ret = uvwasi_sched_yield(&uvwasi);
+    return ret;
+});
+
+IMPORT_IMPL_WASI_ALL(u32, Z_proc_raiseZ_iv, (u32 sig),
+{
+    uvwasi_errno_t ret = uvwasi_proc_raise(&uvwasi, sig);
+    return ret;
+});
+
 IMPORT_IMPL_WASI_ALL(void, Z_proc_exitZ_vi, (u32 code),
 {
     uvwasi_destroy(&uvwasi);
     exit(code);
 });
 
-/* TODO:
- * sched_yield
- * proc_raise
- * path_link
- * path_filestat_set_times
- * fd_tell
- * fd_sync
- * fd_renumber
- * fd_filestat_set_times
- * fd_filestat_set_size
- * fd_fdstat_set_rights
- * fd_datasync
- * fd_allocate
- * fd_advise
- * clock_res_get
- * clock_time_get
- */
 
 int main(int argc, const char** argv)
 {
