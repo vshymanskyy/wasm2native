@@ -67,4 +67,4 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 ### License
 This project is released under The MIT License (MIT)
 
-<!-- wasm2exe wasm2elf -->
+<!-- wasm2exe wasm2elf compiler toolchain -->
