@@ -54,6 +54,8 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 ## TODO
 
 - [x] Bind all WASI imports
+    - [x] `wasi_snapshot_preview1`
+    - [x] `wasi_unstable` compatibility layer
 - [ ] Convert main script to `zig`
     - [ ] Allow setting `CFLAGS`, overriding optimization flags
 - [ ] Windows host support
