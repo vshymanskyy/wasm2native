@@ -15,21 +15,29 @@ static uvwasi_t uvwasi;
 
 #define MEMACCESS(addr) ((void*)&WASM_RT_ADD_PREFIX(Z_memory)->data[(addr)])
 
-#define MEM_SET(addr, value, len) memset(MEMACCESS(addr), value, len)
-#define MEM_WRITE8(addr, value)  (*(u8*) MEMACCESS(addr)) = value
-#define MEM_WRITE16(addr, value) (*(u16*)MEMACCESS(addr)) = value
-#define MEM_WRITE32(addr, value) (*(u32*)MEMACCESS(addr)) = value
-#define MEM_WRITE64(addr, value) (*(u64*)MEMACCESS(addr)) = value
-  
-#define MEM_READ32(addr) (*(u32*)MEMACCESS(addr))
+#if WABT_BIG_ENDIAN
+    #define MEM_SET(addr, value, len) memset(MEMACCESS(addr), (value), (len))
+    #define MEM_WRITE8(addr, value)  (*(u8*) MEMACCESS(addr)) = (value)
+    #define MEM_WRITE16(addr, value) (*(u16*)MEMACCESS(addr)) = WASM_RT_BSWAP16(value)
+    #define MEM_WRITE32(addr, value) (*(u32*)MEMACCESS(addr)) = WASM_RT_BSWAP32(value)
+    #define MEM_WRITE64(addr, value) (*(u64*)MEMACCESS(addr)) = WASM_RT_BSWAP64(value)
+
+    #define READ32(x)           WASM_RT_BSWAP32(*(u32*)(x))
+#else
+    #define MEM_SET(addr, value, len) memset(MEMACCESS(addr), (value), (len))
+    #define MEM_WRITE8(addr, value)  (*(u8*) MEMACCESS(addr)) = (value)
+    #define MEM_WRITE16(addr, value) (*(u16*)MEMACCESS(addr)) = (value)
+    #define MEM_WRITE32(addr, value) (*(u32*)MEMACCESS(addr)) = (value)
+    #define MEM_WRITE64(addr, value) (*(u64*)MEMACCESS(addr)) = (value)
+
+    #define READ32(x)           (*(u32*)(x))
+#endif
   
 #define IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  IMPORT_IMPL(ret, Z_wasi_unstable##name, params, body)
 #define IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)  IMPORT_IMPL(ret, Z_wasi_snapshot_preview1##name, params, body)
 #define IMPORT_IMPL_WASI_ALL(ret, name, params, body) \
   IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  \
   IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)
-
-#define READ32(x)   (*(u32*)(x))
 
 // TODO: Add linear memory boundary checks
 

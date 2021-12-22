@@ -23,11 +23,12 @@ app.wasm + wasm2c + compiler (Zig) + uvwasi + libuv = native app
 CC="clang-12" ./build-full.sh ./examples/coremark.wasm
 
 # Cross-compile with Zig CC: x86_64-windows-gnu, x86_64-linux-gnu, x86_64-macos-gnu
-CC="zig cc -Dtarget=x86_64-linux-musl" ./build-full.sh ./examples/coremark.wasm
+CC="zig cc -target x86_64-linux-musl" ./build-full.sh ./examples/coremark.wasm
 
-# Cross-compilation to other architectures:
-CC="zig cc -Dtarget=mips-linux-musl" ./build-full.sh ./examples/hello.wasm
-qemu-mips-static hello.elf
+# Cross-compilation to other architectures
+# For full targets list: zig targets | jq .libc
+CC="zig cc -target aarch64-linux-musl" ./build-full.sh ./examples/hello.wasm
+qemu-aarch64-static hello.elf
 Hello from WebAssembly!
 
 ### Two-step mode (faster)
@@ -63,7 +64,7 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 - [ ] `CMake+Zig` as the primary toolchain
     - [ ] Use Zig to build `libuv`, `uvwasi`
     - [x] Ship `wasm2c.wasm` as an example app ;)
-    - [ ] Fix cross-compilation
+    - [x] Fix cross-compilation
     - [ ] Big-endian target support
 - [ ] Improve build speed for big apps. Split `wasm2c` output?
 
