@@ -1,4 +1,4 @@
-# [WIP] wasm2native
+# wasm2native
 
 Turn WASI apps into native executables
 
@@ -62,12 +62,13 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 - [ ] Windows host support
 - [ ] CI via Github Actions
 - [ ] `Zig` as the primary toolchain
-    - [ ] Use Zig to build `libuv`, `uvwasi`
+    - [x] Use Zig to build `libuv`, `uvwasi`
     - [x] Ship `wasm2c.wasm` as an example app ;)
     - [x] Fix cross-compilation
-    - [ ] Big-endian target support
+- [ ] Big-endian target support
+- [ ] Improve build speed for big apps
 - [ ] Get rid of mandatory CMake dependency (write build script for `libuv` and `uvwasi` for major platforms)
-- [ ] Improve build speed for big apps. Split `wasm2c` output?
+    - [ ] Support parallel builds
 
 ### License
 This project is released under The MIT License (MIT)
