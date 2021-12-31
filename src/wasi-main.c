@@ -3,17 +3,112 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "wasi-app.h"
-#include "wasm-rt.h"
+#ifdef USE_WASM2C
+
+    #include "wasi-app.h"
+    #include "wasm-rt.h"
+
+    #define IMPORT_IMPL(ret, name, params, body)            \
+      static ret _##name params body                        \
+      ret (*WASM_RT_ADD_PREFIX(name)) params = _##name;
+
+    #define IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  IMPORT_IMPL(ret, Z_wasi_unstable##name, params, body)
+    #define IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)  IMPORT_IMPL(ret, Z_wasi_snapshot_preview1##name, params, body)
+    #define IMPORT_IMPL_WASI_ALL(ret, name, params, body) \
+      IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  \
+      IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)
+
+    #define MEMACCESS(addr) ((void*)&WASM_RT_ADD_PREFIX(Z_memory)->data[(addr)])
+
+#else
+
+    #include "w2c2_base.h"
+    #include "wasm/decls.h"
+
+    typedef U8  u8;
+    typedef U16 u16;
+    typedef U32 u32;
+    typedef U64 u64;
+
+    extern void init();
+
+    void trap(Trap trap) {
+        exit(1);
+    }
+
+    #if WASM_ENDIAN == WASM_BIG_ENDIAN
+        #define WABT_BIG_ENDIAN 1
+    #endif
+
+    #define IMPORT_IMPL_WASI_UNSTABLE_(ret, name, parameters, body)         \
+      static ret _wasiX5Funstable_##name parameters body                   \
+      ret (*f_wasiX5Funstable_##name) parameters = _wasiX5Funstable_##name;
+
+    #define IMPORT_IMPL_WASI_PREVIEW1_(ret, name, parameters, body)         \
+      static ret _wasiX5FsnapshotX5Fpreview1_##name parameters body        \
+      ret (*f_wasiX5FsnapshotX5Fpreview1_##name) parameters = _wasiX5FsnapshotX5Fpreview1_##name;
+
+    #define IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body) \
+      IMPORT_IMPL_WASI_UNSTABLE_(ret, name, params, body)
+
+    #define IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body) \
+      IMPORT_IMPL_WASI_PREVIEW1_(ret, name, params, body)
+
+    #define IMPORT_IMPL_WASI_ALL(ret, name, params, body)   \
+      IMPORT_IMPL_WASI_UNSTABLE_(ret, name, params, body)   \
+      IMPORT_IMPL_WASI_PREVIEW1_(ret, name, params, body)
+
+    #define MEMACCESS(addr) ((void*)&e_memory->data[(addr)])
+
+    #define Z_fd_prestat_getZ_iii               fdX5FprestatX5Fget
+    #define Z_fd_prestat_dir_nameZ_iiii         fdX5FprestatX5FdirX5Fname
+    #define Z_environ_sizes_getZ_iii            environX5FsizesX5Fget
+    #define Z_environ_getZ_iii                  environX5Fget
+    #define Z_args_sizes_getZ_iii               argsX5FsizesX5Fget
+    #define Z_args_getZ_iii                     argsX5Fget
+    #define Z_fd_fdstat_getZ_iii                fdX5FfdstatX5Fget
+    #define Z_fd_fdstat_set_flagsZ_iii          fdX5FfdstatX5FsetX5Fflags
+    #define Z_fd_fdstat_set_rightsZ_iijj        fdX5FfdstatX5FsetX5Frights
+    #define Z_path_filestat_set_timesZ_iijj     pathX5FfilestatX5FsetX5Ftimes
+    #define Z_path_filestat_getZ_iiiiii         pathX5FfilestatX5Fget
+    #define Z_fd_filestat_getZ_iii              fdX5FfilestatX5Fget
+    #define Z_fd_seekZ_iijii                    fdX5Fseek
+    #define Z_fd_tellZ_iii                      fdX5Ftell
+    #define Z_fd_filestat_set_sizeZ_iij         fdX5FfilestatX5FsetX5Fsize
+    #define Z_fd_filestat_set_timesZ_iijj       fdX5FfilestatX5FsetX5Ftimes
+    #define Z_fd_syncZ_ii                       fdX5Fsync
+    #define Z_fd_datasyncZ_ii                   fdX5Fdatasync
+    #define Z_fd_renumberZ_ii                   fdX5Frenumber
+    #define Z_fd_allocateZ_iijj                 fdX5Fallocate
+    #define Z_fd_adviseZ_iijji                  fdX5Fadvise
+    #define Z_path_openZ_iiiiiijjii             pathX5Fopen
+    #define Z_fd_closeZ_ii                      fdX5Fclose
+    #define Z_path_symlinkZ_iiiiii              pathX5Fsymlink
+    #define Z_path_renameZ_iiiiiii              pathX5Frename
+    #define Z_path_linkZ_iiiiiiii               pathX5Flink
+    #define Z_path_unlink_fileZ_iiii            pathX5FunlinkX5Ffile
+    #define Z_path_readlinkZ_iiiiiii            pathX5Freadlink
+    #define Z_path_create_directoryZ_iiii       pathX5FcreateX5Fdirectory
+    #define Z_path_remove_directoryZ_iiii       pathX5FremoveX5Fdirectory
+    #define Z_fd_readdirZ_iiiiji                fdX5Freaddir
+    #define Z_fd_writeZ_iiiii                   fdX5Fwrite
+    #define Z_fd_pwriteZ_iiiii                  fdX5Fpwrite
+    #define Z_fd_readZ_iiiii                    fdX5Fread
+    #define Z_fd_preadZ_iiiiji                  fdX5Fpread
+    #define Z_poll_oneoffZ_iiiii                pollX5Foneoff
+    #define Z_clock_res_getZ_iii                clockX5FresX5Fget
+    #define Z_clock_time_getZ_iiji              clockX5FtimeX5Fget
+    #define Z_random_getZ_iii                   randomX5Fget
+    #define Z_sched_yieldZ_iv                   schedX5Fyield
+    #define Z_proc_raiseZ_iv                    procX5Fraise
+    #define Z_proc_exitZ_vi                     procX5Fexit
+
+#endif
+
 #include "uvwasi.h"
 
 static uvwasi_t uvwasi;
 
-#define IMPORT_IMPL(ret, name, params, body)            \
-  static ret _##name params body                        \
-  ret (*WASM_RT_ADD_PREFIX(name)) params = _##name;
-
-#define MEMACCESS(addr) ((void*)&WASM_RT_ADD_PREFIX(Z_memory)->data[(addr)])
 
 #if WABT_BIG_ENDIAN
     #define MEM_SET(addr, value, len) memset(MEMACCESS(addr), (value), (len))
@@ -32,12 +127,6 @@ static uvwasi_t uvwasi;
 
     #define READ32(x)           (*(u32*)(x))
 #endif
-  
-#define IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  IMPORT_IMPL(ret, Z_wasi_unstable##name, params, body)
-#define IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)  IMPORT_IMPL(ret, Z_wasi_snapshot_preview1##name, params, body)
-#define IMPORT_IMPL_WASI_ALL(ret, name, params, body) \
-  IMPORT_IMPL_WASI_UNSTABLE(ret, name, params, body)  \
-  IMPORT_IMPL_WASI_PREVIEW1(ret, name, params, body)
 
 // TODO: Add linear memory boundary checks
 
@@ -617,7 +706,11 @@ int main(int argc, const char** argv)
 
     init();
 
+#ifdef USE_WASM2C
     Z__startZ_vv();
+#else
+    (*e_X5Fstart)();
+#endif
 
     uvwasi_destroy(&uvwasi);
 

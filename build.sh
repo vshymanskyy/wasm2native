@@ -1,13 +1,19 @@
 export CC=${CC:="zig cc"}
 
-rm -f src/wasi-app.*
+JOBS=$((`nproc`+1))
 
-wasm2c "$1" -o wasi-app.c
-mv wasi-app.* ./src
+rm -rf ./src/wasm/
 
-OPT_FLAGS="-O3 -flto -fomit-frame-pointer -fno-stack-protector -march=native"
-SRCS="src/wasi-app.c src/wasi-main.c src/wasm-rt-impl.c"
-DEPS="-Ibuild/_deps/uvwasi-src/include -Lbuild/_deps/libuv-build -Lbuild/_deps/uvwasi-build -luvwasi_a -luv_a -lpthread -ldl -lm"
+#wasm-opt -Os --converge --strip-debug
+#wasm2c --no-debug-names "$1" -o wasi-app.c
+#mv wasi-app.* ./src
+
+mkdir -p ./src/wasm/
+./deps/w2c2/w2c2 -j $JOBS -f 250 -o ./src/wasm/ "$1"
+
+OPT_FLAGS="-O3 -flto=thin -fomit-frame-pointer -fno-stack-protector -march=native"
+SRCS="$(ls ./src/wasm/*.c) src/wasi-main.c"
+DEPS="-Ideps/w2c2/ -Ibuild/_deps/uvwasi-src/include -Lbuild/_deps/libuv-build -Lbuild/_deps/uvwasi-build -luvwasi_a -luv_a -lpthread -ldl -lm"
 
 
 

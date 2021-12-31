@@ -20,28 +20,18 @@ app.wasm + wasm2c + compiler (Zig) + uvwasi + libuv = native app
 
 ```sh
 # Single step:
-CC="clang-12" ./build-full.sh ./examples/coremark.wasm
+export CC="clang-12"
+export LDFLAGS="-fuse-ld=lld"
+./build.sh ./examples/coremark.wasm
 
 # Cross-compile with Zig CC: x86_64-windows-gnu, x86_64-linux-gnu, x86_64-macos-gnu
-CC="zig cc -target x86_64-linux-musl" ./build-full.sh ./examples/coremark.wasm
+CC="zig cc -target x86_64-linux-musl" ./build.sh ./examples/coremark.wasm
 
 # Cross-compilation to other architectures
 # For full targets list: zig targets | jq .libc
-CC="zig cc -target aarch64-linux-musl" ./build-full.sh ./examples/hello.wasm
+CC="zig cc -target aarch64-linux-musl" ./build.sh ./examples/hello.wasm
 qemu-aarch64-static hello.elf
 Hello from WebAssembly!
-
-### Two-step mode (faster)
-
-# Build libs (needed only once):
-./build-libs.sh
-
-# Build app (defaults to Zig):
-./build.sh ./examples/coremark.wasm
-
-# Specify another compiler:
-CC=gcc ./build.sh ./examples/coremark.wasm
-CC=clang-12 ./build.sh ./examples/coremark.wasm
 ```
 
 **Note:** this tool can be used for building `WASI` apps, not `emscripten`-generated `wasm+js` output.

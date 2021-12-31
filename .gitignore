@@ -1,3 +1,4 @@
 build/
-wasi-app.*
+src/wasm/
+deps/w2c2/
 *.elf
