@@ -7,7 +7,7 @@ Turn WASI apps into native executables
 The approach is similar to [`WasmBoxC`](https://kripken.github.io/blog/wasm/2020/07/27/wasmboxc.html) or [`RLBox`](https://hacks.mozilla.org/2020/02/securing-firefox-with-webassembly/):
 
 ```log
-app.wasm => WASM to C => platform compiler (Zig) + uvwasi + libuv => native app
+app.wasm => WASM to C => platform compiler + uvwasi + libuv => native app
 ```
 
 ## Prerequisites
