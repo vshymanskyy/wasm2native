@@ -44,20 +44,12 @@ Intel(R) Core(TM) i5-10400 CPU @ 2.90GHz, single-thread:
 
 ## TODO
 
-- [x] Bind all WASI imports
-    - [x] `wasi_snapshot_preview1`
-    - [x] `wasi_unstable` compatibility layer
+- [ ] Big-endian target support
+- [ ] Windows host support
 - [ ] Convert main script to `zig`
     - [ ] Allow setting `CFLAGS`, overriding optimization flags
-- [ ] Windows host support
 - [ ] CI via Github Actions
-- [ ] `Zig` as the primary toolchain
-    - [ ] Use Zig to build `libuv`, `uvwasi`
-    - [x] Ship `wasm2c.wasm` as an example app ;)
-    - [x] Fix cross-compilation
-    - [ ] Big-endian target support
 - [ ] Get rid of mandatory CMake dependency (write build script for `libuv` and `uvwasi` for major platforms)
-- [ ] Improve build speed for big apps. Split `wasm2c` output?
 
 ### License
 This project is released under The MIT License (MIT)
