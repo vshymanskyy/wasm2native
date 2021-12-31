@@ -1,4 +1,4 @@
-# [WIP] wasm2native
+# wasm2native
 
 Turn WASI apps into native executables
 
