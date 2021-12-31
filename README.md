@@ -14,7 +14,6 @@ app.wasm => WASM to C => platform compiler + uvwasi + libuv => native app
 
 - CMake
 - Native toolchain (GCC/Clang/MSVC). Optional: [Zig](https://github.com/ziglang/zig/releases/latest)
-- [WABT](https://github.com/WebAssembly/wabt/releases/latest)
 
 ## Usage examples
 
