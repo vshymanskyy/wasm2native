@@ -1,7 +1,19 @@
 export CC
+export CXX
+export CFLAGS
+export LDFLAGS
 
-#rm -rf ./build
-#rm -rf ./src/wasm
+if [ ! -f ./deps/w2c2/w2c2 ]; then
+    cd ./deps
+    unzip -o w2c2.zip
+    cd w2c2
+    make
+    cd ../..
+fi
+
+
+rm -rf ./build
+rm -rf ./src/wasm
 
 #wasm2c "$1" -o wasi-app.c
 #mv wasi-app.* ./src
